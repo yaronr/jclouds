@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -55,6 +56,7 @@ import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.compute.functions.FirewallTagNamingConvention;
 import org.jclouds.googlecomputeengine.compute.functions.Resources;
 import org.jclouds.googlecomputeengine.compute.options.GoogleComputeEngineTemplateOptions;
+import org.jclouds.googlecomputeengine.compute.options.GoogleComputeEngineTemplateOptions.AutoCreateDiskOptions;
 import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.DiskType;
 import org.jclouds.googlecomputeengine.domain.Image;
@@ -68,6 +70,8 @@ import org.jclouds.googlecomputeengine.domain.Region;
 import org.jclouds.googlecomputeengine.domain.Tags;
 import org.jclouds.googlecomputeengine.domain.Zone;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
+import org.jclouds.googlecomputeengine.features.DiskApi;
+import org.jclouds.googlecomputeengine.options.DiskCreationOptions;
 import org.jclouds.location.suppliers.all.JustProvider;
 
 /**
@@ -138,11 +142,34 @@ public final class GoogleComputeEngineServiceAdapter
       if (ports != null){
          tags.add(naming.name(ports));
       }
+      
+      disks.addAll(options.getDisks());
+      if (null != options.getAutoCreateDiskOptions()) {
+         AutoCreateDiskOptions diskOptions = options.getAutoCreateDiskOptions();
+         Preconditions.checkArgument(template.getLocation().getScope() == LocationScope.ZONE);
+         DiskApi diskApi = api.disksInZone(template.getLocation().getId());
+         Operation op = diskApi.create(
+               diskOptions.getDiskName(name),
+               new DiskCreationOptions.Builder().sizeGb(diskOptions.diskSizeGb).build());
+
+         AttachDisk disk = AttachDisk.create(
+               diskOptions.diskType,
+               diskOptions.diskMode,
+               op.targetLink(),
+               diskOptions.getDiskName(name),
+               false,
+               null,
+               true,
+               null,
+               null);
+         disks.add(disk);
+      }
 
       NewInstance newInstance = new NewInstance.Builder( name,
             template.getHardware().getUri(), // machineType
             network,
             disks)
+            .canIpForward(options.canIpForward())
             .description(group)
             .tags(Tags.create(null, ImmutableList.copyOf(tags)))
             .serviceAccounts(options.serviceAccounts())
@@ -172,7 +199,7 @@ public final class GoogleComputeEngineServiceAdapter
             Instance.Status.PROVISIONING, // status
             null, // statusMessage
             create.zone(), // zone
-            null, // canIpForward
+            newInstance.canIpForward(), // canIpForward
             null, // networkInterfaces
             null, // disks
             newInstance.metadata(), // metadata
