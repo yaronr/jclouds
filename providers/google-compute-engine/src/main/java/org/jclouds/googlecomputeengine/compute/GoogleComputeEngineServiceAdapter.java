@@ -152,14 +152,14 @@ public final class GoogleComputeEngineServiceAdapter
       for(AutoCreateDiskOptions diskOptions:options.getAutoCreateDisks()) {
          DiskApi diskApi = api.disksInZone(template.getLocation().getId());
          Operation op = diskApi.create(
-               diskOptions.getDiskName(name),
-               new DiskCreationOptions.Builder().sizeGb(diskOptions.diskSizeGb).build());
+               diskOptions.diskName(), 
+               new DiskCreationOptions.Builder().sizeGb(diskOptions.diskSizeGb()).build());
 
          AttachDisk disk = AttachDisk.create(
-               diskOptions.diskType,
-               diskOptions.diskMode,
+               diskOptions.diskType(),
+               diskOptions.diskMode(),
                op.targetLink(),
-               diskOptions.getDiskName(name),
+               diskOptions.diskName(),
                false,
                null,
                true,

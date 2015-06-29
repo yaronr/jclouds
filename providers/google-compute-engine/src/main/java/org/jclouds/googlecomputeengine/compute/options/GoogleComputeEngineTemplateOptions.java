@@ -26,6 +26,9 @@ import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Instance.ServiceAccount;
 import org.jclouds.scriptbuilder.domain.Statement;
 
+import autovalue.shaded.com.google.common.common.base.Preconditions;
+
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.Lists;
 
 /** Instance options specific to Google Compute Engine. */
@@ -309,19 +312,21 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
     * @see org.jclouds.googlecomputeengine.domain.templates.InstanceTemplate.AttachDisk
     */
    public GoogleComputeEngineTemplateOptions addDisk(AttachDisk disk) {
+      Preconditions.checkNotNull(disk, "disk");
       this.disks.add(disk);
       return this;
    }
 
    public void autoCreateDisk(final AutoCreateDiskOptions diskOptions) {
+      Preconditions.checkNotNull(diskOptions, "diskOptions");
       this.autoCreateDisks.add(diskOptions);
    }
 
    public void autoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
+      Preconditions.checkNotNull(autoCreateDisks, "autoCreateDisks");
       this.autoCreateDisks.addAll(autoCreateDisks);
    }
 
-   
    public List<AutoCreateDiskOptions> getAutoCreateDisks() {
       return autoCreateDisks;
    }
@@ -342,36 +347,27 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       return this;
    }
 
-   
-   
-   public static class AutoCreateDiskOptions {
+   @AutoValue
+   public static abstract class AutoCreateDiskOptions {
 
-      public final AttachDisk.Type diskType;
-      public final AttachDisk.Mode diskMode;
-      public final boolean isBootDisk;
-      public final int diskSizeGb;
-      private String diskName = null;
+      public abstract AttachDisk.Type diskType();
 
-      public AutoCreateDiskOptions(final AttachDisk.Type diskType, final AttachDisk.Mode diskMode,
-            final boolean isBootDisk, final int diskSizeGb) {
-         this.diskType = diskType;
-         this.diskMode = diskMode;
-         this.isBootDisk = isBootDisk;
-         this.diskSizeGb = diskSizeGb;
+      public abstract AttachDisk.Mode diskMode();
+
+      public abstract boolean isBootDisk();
+
+      public abstract int diskSizeGb();
+
+      public abstract String diskName();
+
+      static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb) {
+         return new AutoValue_GoogleComputeEngineTemplateOptions_AutoCreateDiskOptions(diskType, diskMode, isBootDisk,
+               diskSizeGb, "jclouds-" + UUID.randomUUID().toString());
       }
 
-      public AutoCreateDiskOptions(final AttachDisk.Type diskType, final AttachDisk.Mode diskMode,
-            final boolean isBootDisk, final int diskSizeGb, final String diskName) {
-         this(diskType, diskMode, isBootDisk, diskSizeGb);
-         // TODO: Validate against regex according to GCE spec. What is the GCE spec?
-         this.diskName = diskName;
-      }
-
-      public String getDiskName(final String nodeName) {
-         if (null != diskName)
-            return diskName;
-         else
-            return "jclouds-" + UUID.randomUUID().toString();
+      static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb, String diskName) {
+         return new AutoValue_GoogleComputeEngineTemplateOptions_AutoCreateDiskOptions(diskType, diskMode, isBootDisk,
+               diskSizeGb, diskName);
       }
    }
 }
