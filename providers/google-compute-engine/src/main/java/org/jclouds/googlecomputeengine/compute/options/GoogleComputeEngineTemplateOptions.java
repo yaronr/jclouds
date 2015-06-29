@@ -18,7 +18,6 @@ package org.jclouds.googlecomputeengine.compute.options;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.jclouds.compute.options.TemplateOptions;
@@ -26,8 +25,6 @@ import org.jclouds.domain.LoginCredentials;
 import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Instance.ServiceAccount;
 import org.jclouds.scriptbuilder.domain.Statement;
-
-import autovalue.shaded.com.google.common.common.collect.Sets;
 
 import com.google.common.collect.Lists;
 
@@ -38,7 +35,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
    private List<ServiceAccount> serviceAccounts;
    private String bootDiskType;
    private List<AttachDisk> disks = Lists.newArrayList();
-   private Set<AutoCreateDiskOptions> autoCreateDisks = Sets.newHashSet();
+   private List<AutoCreateDiskOptions> autoCreateDisks = Lists.newLinkedList();
    private boolean canIpForward = false;
 
    @Override
@@ -320,12 +317,12 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       this.autoCreateDisks.add(diskOptions);
    }
 
-   public void autoCreateDisks(final Set<AutoCreateDiskOptions> autoCreateDisks) {
+   public void autoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
       this.autoCreateDisks.addAll(autoCreateDisks);
    }
 
    
-   public Set<AutoCreateDiskOptions> getAutoCreateDisks() {
+   public List<AutoCreateDiskOptions> getAutoCreateDisks() {
       return autoCreateDisks;
    }
 
@@ -345,6 +342,8 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       return this;
    }
 
+   
+   
    public static class AutoCreateDiskOptions {
 
       public final AttachDisk.Type diskType;
