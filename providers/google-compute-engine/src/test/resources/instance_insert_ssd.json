@@ -1,5 +1,6 @@
 {
   "machineType": "%s",
+  "canIpForward":false,
   "name": "test-1",
   "networkInterfaces": [
     {
