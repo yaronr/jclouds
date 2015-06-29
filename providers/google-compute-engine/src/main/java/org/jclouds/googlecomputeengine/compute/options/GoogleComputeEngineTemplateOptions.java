@@ -52,7 +52,6 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       super.copyTo(to);
       if (to instanceof GoogleComputeEngineTemplateOptions) {
          GoogleComputeEngineTemplateOptions eTo = GoogleComputeEngineTemplateOptions.class.cast(to);
-         eTo.networks(to.getNetworks()); // YR: this is not relevant for my PR, but I think not having it is a bug
          eTo.autoCreateKeyPair(autoCreateKeyPair());
          eTo.serviceAccounts(serviceAccounts());
          eTo.bootDiskType(bootDiskType());
