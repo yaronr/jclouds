@@ -26,9 +26,8 @@ import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Instance.ServiceAccount;
 import org.jclouds.scriptbuilder.domain.Statement;
 
-import autovalue.shaded.com.google.common.common.base.Preconditions;
-
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 /** Instance options specific to Google Compute Engine. */
@@ -348,7 +347,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
    }
 
    @AutoValue
-   public static abstract class AutoCreateDiskOptions {
+   public abstract static class AutoCreateDiskOptions {
 
       public abstract AttachDisk.Type diskType();
 

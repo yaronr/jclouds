@@ -149,7 +149,7 @@ public final class GoogleComputeEngineServiceAdapter
       
       Preconditions.checkArgument(template.getLocation().getScope() == LocationScope.ZONE);
       
-      for(AutoCreateDiskOptions diskOptions:options.getAutoCreateDisks()) {
+      for (AutoCreateDiskOptions diskOptions : options.getAutoCreateDisks()) {
          DiskApi diskApi = api.disksInZone(template.getLocation().getId());
          Operation op = diskApi.create(
                diskOptions.diskName(), 
