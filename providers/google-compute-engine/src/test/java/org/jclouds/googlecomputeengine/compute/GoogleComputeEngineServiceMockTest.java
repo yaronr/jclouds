@@ -25,8 +25,6 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
-import com.squareup.okhttp.mockwebserver.MockResponse;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.Hardware;
@@ -35,9 +33,14 @@ import org.jclouds.compute.domain.Template;
 import org.jclouds.domain.Location;
 import org.jclouds.domain.LocationScope;
 import org.jclouds.googlecomputeengine.compute.options.GoogleComputeEngineTemplateOptions;
+import org.jclouds.googlecomputeengine.compute.options.GoogleComputeEngineTemplateOptions.AutoCreateDiskOptions;
+import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.internal.BaseGoogleComputeEngineApiMockTest;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableSet;
+import com.squareup.okhttp.mockwebserver.MockResponse;
 
 @Test(groups = "unit", testName = "GoogleComputeEngineServiceMockTest", singleThreaded = true)
 public class GoogleComputeEngineServiceMockTest extends BaseGoogleComputeEngineApiMockTest {
@@ -205,16 +208,19 @@ public class GoogleComputeEngineServiceMockTest extends BaseGoogleComputeEngineA
       server.enqueue(jsonResponse("/zone_operation.json"));
       server.enqueue(aggregatedListWithInstanceNetworkAndStatus("test-0", "test-network", RUNNING));
       server.enqueue(jsonResponse("/disk_get_with_source_image.json"));
+      server.enqueue(jsonResponse("/auto_disk_get.json"));
       server.enqueue(jsonResponse("/image_get_for_source_image.json"));
       server.enqueue(jsonResponse("/disktype_ssd.json"));
       server.enqueue(jsonResponse("/operation.json")); // Create Instance
       server.enqueue(instanceWithNetworkAndStatusAndSsd("test-1", "test-network", RUNNING));
 
       ComputeService computeService = computeService();
+      
+      AutoCreateDiskOptions diskOptions = AutoCreateDiskOptions.create(AttachDisk.Type.PERSISTENT, AttachDisk.Mode.READ_WRITE, false, 8, "jClouds-auto-disk-test" );
 
       GoogleComputeEngineTemplateOptions options = computeService.templateOptions()
             .as(GoogleComputeEngineTemplateOptions.class).autoCreateKeyPair(false)
-            .tags(ImmutableSet.of("aTag")).blockUntilRunning(false)
+            .tags(ImmutableSet.of("aTag")).blockUntilRunning(false).autoCreateDisk(diskOptions)
             .bootDiskType("pd-ssd");
 
       Template template = computeService.templateBuilder().options(options).build();
@@ -236,6 +242,7 @@ public class GoogleComputeEngineServiceMockTest extends BaseGoogleComputeEngineA
       assertSent(server, "GET", "/projects/party/zones/us-central1-a/operations/operation-1354084865060");
       assertSent(server, "GET", "/projects/party/aggregated/instances");
       assertSent(server, "GET", "/projects/party/zones/us-central1-a/disks/test");
+      assertSent(server, "GET", "/projects/party/zones/us-central1-a/disks/jClouds-auto-disk-test"); 
       assertSent(server, "GET", "/projects/debian-cloud/global/images/debian-7-wheezy-v20140718");
       assertSent(server, "GET", "/projects/party/zones/us-central1-a/diskTypes/pd-ssd");
       assertSent(server, "POST", "/projects/party/zones/us-central1-a/instances",
