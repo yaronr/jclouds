@@ -25,24 +25,16 @@ import static org.jclouds.googlecloud.internal.ListPages.concat;
 import static org.jclouds.googlecomputeengine.compute.strategy.CreateNodesWithGroupEncodedIntoNameThenAddToSet.simplifyPorts;
 import static org.jclouds.googlecomputeengine.config.GoogleComputeEngineProperties.IMAGE_PROJECTS;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Atomics;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.jclouds.compute.ComputeServiceAdapter;
 import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.NodeMetadata;
@@ -69,10 +61,21 @@ import org.jclouds.googlecomputeengine.domain.Operation;
 import org.jclouds.googlecomputeengine.domain.Region;
 import org.jclouds.googlecomputeengine.domain.Tags;
 import org.jclouds.googlecomputeengine.domain.Zone;
-import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.features.DiskApi;
+import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.options.DiskCreationOptions;
 import org.jclouds.location.suppliers.all.JustProvider;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Atomics;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 /**
  * This implementation maps the following:
@@ -144,9 +147,10 @@ public final class GoogleComputeEngineServiceAdapter
       }
       
       disks.addAll(options.getDisks());
-      if (null != options.getAutoCreateDiskOptions()) {
-         AutoCreateDiskOptions diskOptions = options.getAutoCreateDiskOptions();
-         Preconditions.checkArgument(template.getLocation().getScope() == LocationScope.ZONE);
+      
+      Preconditions.checkArgument(template.getLocation().getScope() == LocationScope.ZONE);
+      
+      for(AutoCreateDiskOptions diskOptions:options.getAutoCreateDisks()) {
          DiskApi diskApi = api.disksInZone(template.getLocation().getId());
          Operation op = diskApi.create(
                diskOptions.getDiskName(name),
@@ -162,7 +166,7 @@ public final class GoogleComputeEngineServiceAdapter
                true,
                null,
                null);
-         disks.add(disk);
+         disks.add(disk);         
       }
 
       NewInstance newInstance = new NewInstance.Builder( name,

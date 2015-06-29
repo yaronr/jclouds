@@ -18,6 +18,7 @@ package org.jclouds.googlecomputeengine.compute.options;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jclouds.compute.options.TemplateOptions;
@@ -25,6 +26,8 @@ import org.jclouds.domain.LoginCredentials;
 import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Instance.ServiceAccount;
 import org.jclouds.scriptbuilder.domain.Statement;
+
+import autovalue.shaded.com.google.common.common.collect.Sets;
 
 import com.google.common.collect.Lists;
 
@@ -35,7 +38,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
    private List<ServiceAccount> serviceAccounts;
    private String bootDiskType;
    private List<AttachDisk> disks = Lists.newArrayList();
-   private AutoCreateDiskOptions autoCreateDiskOptions = null;
+   private Set<AutoCreateDiskOptions> autoCreateDisks = Sets.newHashSet();
    private boolean canIpForward = false;
 
    @Override
@@ -55,7 +58,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
          eTo.serviceAccounts(serviceAccounts());
          eTo.bootDiskType(bootDiskType());
          eTo.disks(getDisks());
-         eTo.autoCreateDisk(getAutoCreateDiskOptions());
+         eTo.autoCreateDisks(getAutoCreateDisks());
          eTo.canIpForward(canIpForward());
       }
    }
@@ -314,11 +317,16 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
    }
 
    public void autoCreateDisk(final AutoCreateDiskOptions diskOptions) {
-      this.autoCreateDiskOptions = diskOptions;
+      this.autoCreateDisks.add(diskOptions);
    }
 
-   public AutoCreateDiskOptions getAutoCreateDiskOptions() {
-      return autoCreateDiskOptions;
+   public void autoCreateDisks(final Set<AutoCreateDiskOptions> autoCreateDisks) {
+      this.autoCreateDisks.addAll(autoCreateDisks);
+   }
+
+   
+   public Set<AutoCreateDiskOptions> getAutoCreateDisks() {
+      return autoCreateDisks;
    }
 
    /**
@@ -338,6 +346,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
    }
 
    public static class AutoCreateDiskOptions {
+
       public final AttachDisk.Type diskType;
       public final AttachDisk.Mode diskMode;
       public final boolean isBootDisk;
