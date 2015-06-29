@@ -205,7 +205,7 @@ public class GoogleComputeEngineServiceMockTest extends BaseGoogleComputeEngineA
 
       GoogleComputeEngineTemplateOptions options = computeService.templateOptions()
             .as(GoogleComputeEngineTemplateOptions.class).autoCreateKeyPair(false)
-            .tags(ImmutableSet.of("aTag")).blockUntilRunning(false).autoCreateDisk(diskOptions)
+            .blockUntilRunning(false).autoCreateDisk(diskOptions)
             .bootDiskType("pd-ssd");
 
       Template template = computeService.templateBuilder().options(options).build();
