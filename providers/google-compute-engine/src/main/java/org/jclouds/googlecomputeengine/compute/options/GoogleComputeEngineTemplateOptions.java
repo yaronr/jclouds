@@ -315,14 +315,16 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       return this;
    }
 
-   public void autoCreateDisk(final AutoCreateDiskOptions diskOptions) {
+   public GoogleComputeEngineTemplateOptions autoCreateDisk(final AutoCreateDiskOptions diskOptions) {
       Preconditions.checkNotNull(diskOptions, "diskOptions");
       this.autoCreateDisks.add(diskOptions);
+      return this;
    }
 
-   public void autoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
+   public GoogleComputeEngineTemplateOptions autoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
       Preconditions.checkNotNull(autoCreateDisks, "autoCreateDisks");
       this.autoCreateDisks.addAll(autoCreateDisks);
+      return this;
    }
 
    public List<AutoCreateDiskOptions> getAutoCreateDisks() {
@@ -358,12 +360,12 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
 
       public abstract String diskName();
 
-      static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb) {
+      public static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb) {
          return new AutoValue_GoogleComputeEngineTemplateOptions_AutoCreateDiskOptions(diskType, diskMode, isBootDisk,
                diskSizeGb, "jclouds-" + UUID.randomUUID().toString());
       }
 
-      static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb, String diskName) {
+      public static AutoCreateDiskOptions create(AttachDisk.Type diskType, AttachDisk.Mode diskMode, boolean isBootDisk, int diskSizeGb, String diskName) {
          return new AutoValue_GoogleComputeEngineTemplateOptions_AutoCreateDiskOptions(diskType, diskMode, isBootDisk,
                diskSizeGb, diskName);
       }
