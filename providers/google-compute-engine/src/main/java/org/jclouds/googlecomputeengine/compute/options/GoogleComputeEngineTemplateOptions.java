@@ -56,7 +56,7 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
          eTo.serviceAccounts(serviceAccounts());
          eTo.bootDiskType(bootDiskType());
          eTo.disks(getDisks());
-         eTo.autoCreateDisks(getAutoCreateDisks());
+         eTo.addAutoCreateDisks(getAutoCreateDisks());
          eTo.canIpForward(canIpForward());
       }
    }
@@ -315,13 +315,13 @@ public final class GoogleComputeEngineTemplateOptions extends TemplateOptions {
       return this;
    }
 
-   public GoogleComputeEngineTemplateOptions autoCreateDisk(final AutoCreateDiskOptions diskOptions) {
+   public GoogleComputeEngineTemplateOptions addAutoCreateDisk(final AutoCreateDiskOptions diskOptions) {
       Preconditions.checkNotNull(diskOptions, "diskOptions");
       this.autoCreateDisks.add(diskOptions);
       return this;
    }
 
-   public GoogleComputeEngineTemplateOptions autoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
+   public GoogleComputeEngineTemplateOptions addAutoCreateDisks(final List<AutoCreateDiskOptions> autoCreateDisks) {
       Preconditions.checkNotNull(autoCreateDisks, "autoCreateDisks");
       this.autoCreateDisks.addAll(autoCreateDisks);
       return this;
