@@ -14,27 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jclouds.openstack.nova.v2_0.domain.zonescoped;
+package org.jclouds.openstack.nova.v2_0.domain.regionscoped;
 
 import com.google.common.base.Objects;
 
-/**
- * @deprecated This package has been replaced with {@link org.jclouds.openstack.nova.v2_0.domain.regionscoped}.
- *             Please use {@link org.jclouds.openstack.nova.v2_0.domain.regionscoped.ZoneState ZoneState}
- *             instead. To be removed in jclouds 2.0.
- */
-@Deprecated
 public class ZoneState {
 
    private final boolean available;
 
-   protected ZoneState(boolean available) {
-      this.available = available;
-   }
+   protected ZoneState(boolean available) { this.available = available; }
 
-   public boolean available() {
-      return this.available;
-   }
+   public boolean isAvailable() { return this.available; }
 
    @Override
    public int hashCode() {

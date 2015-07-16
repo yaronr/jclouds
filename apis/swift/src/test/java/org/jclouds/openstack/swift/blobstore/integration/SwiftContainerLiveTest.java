@@ -32,7 +32,7 @@ public class SwiftContainerLiveTest extends BaseContainerLiveTest {
       setIfTestSystemPropertyPresent(props, KeystoneProperties.CREDENTIAL_TYPE);
       return props;
    }
-   
+
    public SwiftContainerLiveTest() {
       provider = System.getProperty("test.swift.provider", "swift");
    }
