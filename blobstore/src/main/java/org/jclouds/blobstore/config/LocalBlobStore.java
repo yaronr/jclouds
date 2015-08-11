@@ -27,7 +27,6 @@ import static com.google.common.collect.Sets.filter;
 import static com.google.common.collect.Sets.newTreeSet;
 import static org.jclouds.blobstore.options.ListContainerOptions.Builder.recursive;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,6 +84,8 @@ import org.jclouds.io.ByteStreams2;
 import org.jclouds.io.ContentMetadata;
 import org.jclouds.io.ContentMetadataCodec;
 import org.jclouds.io.Payload;
+import org.jclouds.io.payloads.ByteArrayPayload;
+import org.jclouds.io.payloads.FilePayload;
 import org.jclouds.logging.Logger;
 import org.jclouds.util.Closeables2;
 
@@ -97,6 +98,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.io.ByteSource;
 import com.google.common.net.HttpHeaders;
 
 @Singleton
@@ -657,18 +659,27 @@ public final class LocalBlobStore implements BlobStore {
          blob = copyBlob(blob);
 
          if (options.getRanges() != null && !options.getRanges().isEmpty()) {
-            byte[] data;
+            long size = 0;
+            ImmutableList.Builder<ByteSource> streams = ImmutableList.builder();
+
+            // We must call getRawContent to work around Blob.setPayload calling ByteSourcePayload.release. If the
+            // Local blobstore returns a ByteArrayPayload or FilePayload it uses a stream, otherwise it uses a
+            // byte array.
+            ByteSource byteSource;
             try {
-               data = ByteStreams2.toByteArrayAndClose(blob.getPayload().openStream());
+               Object inputStream = blob.getPayload().getRawContent();
+               byteSource = (inputStream instanceof ByteArrayPayload || inputStream instanceof FilePayload) ?
+                     (ByteSource) blob.getPayload().getRawContent()
+                     : ByteSource.wrap(ByteStreams2.toByteArrayAndClose(blob.getPayload().openStream()));
             } catch (IOException e) {
                throw new RuntimeException(e);
             }
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
             for (String s : options.getRanges()) {
                // HTTP uses a closed interval while Java array indexing uses a
                // half-open interval.
-               int offset = 0;
-               int last = data.length - 1;
+               long offset = 0;
+               long last = blob.getPayload().getContentMetadata().getContentLength() - 1;
                if (s.startsWith("-")) {
                   offset = last - Integer.parseInt(s.substring(1)) + 1;
                   if (offset < 0) {
@@ -678,27 +689,26 @@ public final class LocalBlobStore implements BlobStore {
                   offset = Integer.parseInt(s.substring(0, s.length() - 1));
                } else if (s.contains("-")) {
                   String[] firstLast = s.split("\\-");
-                  offset = Integer.parseInt(firstLast[0]);
-                  last = Integer.parseInt(firstLast[1]);
+                  offset = Long.parseLong(firstLast[0]);
+                  last = Long.parseLong(firstLast[1]);
                } else {
                   throw new IllegalArgumentException("illegal range: " + s);
                }
 
-               if (offset >= data.length) {
+               if (offset >= blob.getPayload().getContentMetadata().getContentLength()) {
                   throw new IllegalArgumentException("illegal range: " + s);
                }
-               if (last + 1 > data.length) {
-                  last = data.length - 1;
+               if (last + 1 > blob.getPayload().getContentMetadata().getContentLength()) {
+                  last = blob.getPayload().getContentMetadata().getContentLength() - 1;
                }
-               out.write(data, offset, last - offset + 1);
+               streams.add(byteSource.slice(offset, last - offset + 1));
+               size += last - offset + 1;
                blob.getAllHeaders().put(HttpHeaders.CONTENT_RANGE,
-                     "bytes " + offset + "-" + last + "/" + data.length);
+                     "bytes " + offset + "-" + last + "/" + blob.getPayload().getContentMetadata().getContentLength());
             }
             ContentMetadata cmd = blob.getPayload().getContentMetadata();
-            byte[] byteArray = out.toByteArray();
-            blob.setPayload(byteArray);
+            blob.setPayload(ByteSource.concat(streams.build()));
             HttpUtils.copy(cmd, blob.getPayload().getContentMetadata());
-            Long size = Long.valueOf(byteArray.length);
             blob.getPayload().getContentMetadata().setContentLength(size);
             blob.getMetadata().setSize(size);
          }

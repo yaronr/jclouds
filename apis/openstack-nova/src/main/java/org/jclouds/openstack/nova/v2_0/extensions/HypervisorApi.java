@@ -20,8 +20,8 @@ import com.google.common.annotations.Beta;
 import com.google.common.collect.FluentIterable;
 import org.jclouds.Fallbacks.EmptyFluentIterableOnNotFoundOr404;
 import org.jclouds.openstack.keystone.v2_0.filters.AuthenticateRequest;
-import org.jclouds.openstack.nova.v2_0.domain.regionscoped.AvailabilityZone;
-import org.jclouds.openstack.nova.v2_0.domain.regionscoped.AvailabilityZoneDetails;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.Hypervisor;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.HypervisorDetails;
 import org.jclouds.openstack.v2_0.ServiceType;
 import org.jclouds.openstack.v2_0.services.Extension;
 import org.jclouds.rest.annotations.Fallback;
@@ -35,36 +35,25 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Provides access to the OpenStack Compute (Nova) Availability Zone Extension API.
+ * Provides access to the OpenStack Compute (Nova) Hypervisor Extension API.
  */
 @Beta
-@Extension(of = ServiceType.COMPUTE, namespace = ExtensionNamespaces.AVAILABILITY_ZONE)
+@Extension(of = ServiceType.COMPUTE, namespace = ExtensionNamespaces.HYPERVISORS)
 @RequestFilters(AuthenticateRequest.class)
 @Consumes(MediaType.APPLICATION_JSON)
-@Path("/os-availability-zone")
-public interface AvailabilityZoneApi {
+@Path("/os-hypervisors")
+public interface HypervisorApi {
 
-   /**
-    * @return all availability zones
-    * @deprecated Please use {@link #listAvailabilityZones()} instead. To be removed in jclouds 2.0.
-    */
-   @Deprecated
-   @Named("availabilityZone:list")
+   @Named("hypervisors:list")
    @GET
-   @SelectJson("availabilityZoneInfo")
+   @SelectJson("hypervisors")
    @Fallback(EmptyFluentIterableOnNotFoundOr404.class)
-   FluentIterable<org.jclouds.openstack.nova.v2_0.domain.zonescoped.AvailabilityZone> list();
+   FluentIterable<Hypervisor> list();
 
-   @Named("availabilityZone:list")
-   @GET
-   @SelectJson("availabilityZoneInfo")
-   @Fallback(EmptyFluentIterableOnNotFoundOr404.class)
-   FluentIterable<AvailabilityZone> listAvailabilityZones();
-
-   @Named("availabilityZone:list")
+   @Named("hypervisors:list")
    @GET
    @Path("/detail")
-   @SelectJson("availabilityZoneInfo")
+   @SelectJson("hypervisors")
    @Fallback(EmptyFluentIterableOnNotFoundOr404.class)
-   FluentIterable<AvailabilityZoneDetails> listInDetail();
+   FluentIterable<HypervisorDetails> listInDetail();
 }

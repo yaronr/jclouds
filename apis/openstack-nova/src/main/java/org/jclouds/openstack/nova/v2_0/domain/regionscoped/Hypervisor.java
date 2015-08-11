@@ -14,30 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jclouds.softlayer.features;
+package org.jclouds.openstack.nova.v2_0.domain.regionscoped;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import java.util.Set;
-
-import org.jclouds.softlayer.domain.SoftwareDescription;
-import org.testng.annotations.Test;
+import com.google.auto.value.AutoValue;
+import org.jclouds.javax.annotation.Nullable;
+import org.jclouds.json.SerializedNames;
 
 /**
- * Tests behavior of {@code SoftwareDescriptionApi}
+ * Hypervisor which shows id and name
  */
-@Test(groups = "live")
-public class SoftwareDescriptionApiLiveTest extends BaseSoftLayerApiLiveTest {
+@AutoValue
+public abstract class Hypervisor {
 
-   @Test
-   public void testGetAllObjects() {
-      Set<SoftwareDescription> response = api().getAllObjects();
-      assertNotNull(response);
-      assertTrue(response.size() > 0);
+   public abstract String getId();
+
+   @Nullable
+   public abstract String getName();
+
+   @SerializedNames({"id" , "hypervisor_hostname"})
+   private static Hypervisor create(String id, String name) {
+      return new AutoValue_Hypervisor(id, name);
    }
-
-   private SoftwareDescriptionApi api() {
-      return api.getSoftwareDescriptionApi();
-   }
-
 }

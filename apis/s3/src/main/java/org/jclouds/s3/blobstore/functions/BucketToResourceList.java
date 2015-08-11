@@ -16,7 +16,6 @@
  */
 package org.jclouds.s3.blobstore.functions;
 
-import java.util.Map;
 import java.util.SortedSet;
 
 import javax.inject.Inject;
@@ -29,7 +28,6 @@ import org.jclouds.s3.domain.ListBucketResponse;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Singleton
@@ -57,7 +55,6 @@ public class BucketToResourceList implements
       SortedSet<StorageMetadata> contents = Sets.<StorageMetadata> newTreeSet(Iterables.transform(from,
                object2blobMd));
 
-      Map<String, StorageMetadata> nameToMd = Maps.uniqueIndex(contents, indexer);
       for (String prefix : from.getCommonPrefixes()) {
          contents.add(prefix2ResourceMd.apply(prefix));
       }
