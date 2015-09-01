@@ -14,28 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jclouds.blobstore.domain;
+package org.jclouds.rackspace.cloudfiles.v1.features;
 
-public enum StorageType {
+import org.testng.annotations.Test;
 
-   /**
-    * A container
-    */
-   CONTAINER,
-   /**
-    * An object in the object store
-    */
-   BLOB,
-   /**
-    * Represents "special" blobs that have content-type set to
-    * application/directory.
-    */
-   FOLDER,
-   /**
-    * A partial path; used when the delimiter is set and represents all objects
-    * that start with the same name up to the delimiter character (e.g. foo-bar
-    * and foo-baz, with delimiter set to "-" will be returned as "foo-").
-    */
-   RELATIVE_PATH;
-
+/**
+ * Tests the live behavior of the OpenStack Object Storage {@link ObjectApi}
+ * via the {@link CloudFilesApi}.
+ */
+@Test(groups = "live", testName = "CloudFilesUKObjectApiLiveTest")
+public class CloudFilesUKObjectApiLiveTest extends CloudFilesObjectApiLiveTest {
+   public CloudFilesUKObjectApiLiveTest() {
+      provider = "rackspace-cloudfiles-uk";
+   }
 }

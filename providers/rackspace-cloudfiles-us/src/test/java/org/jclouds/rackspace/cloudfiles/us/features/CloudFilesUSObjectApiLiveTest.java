@@ -14,18 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jclouds.blobstore.strategy;
+package org.jclouds.rackspace.cloudfiles.v1.features;
 
-import org.jclouds.blobstore.domain.StorageMetadata;
-import org.jclouds.blobstore.strategy.internal.MarkersIfDirectoryReturnNameStrategy;
-
-import com.google.inject.ImplementedBy;
+import org.testng.annotations.Test;
 
 /**
- * Determines if a directory exists or not.
+ * Tests the live behavior of the OpenStack Object Storage {@link ObjectApi}
+ * via the {@link CloudFilesApi}.
  */
-@ImplementedBy(MarkersIfDirectoryReturnNameStrategy.class)
-public interface IfDirectoryReturnNameStrategy {
-
-   String execute(StorageMetadata metadata);
+@Test(groups = "live", testName = "CloudFilesUSObjectApiLiveTest")
+public class CloudFilesUSObjectApiLiveTest extends CloudFilesObjectApiLiveTest {
+   public CloudFilesUSObjectApiLiveTest() {
+      provider = "rackspace-cloudfiles-us";
+   }
 }
