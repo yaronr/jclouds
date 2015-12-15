@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -39,6 +40,7 @@ import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.options.TemplateOptions;
+import org.jclouds.compute.reference.ComputeServiceConstants;
 import org.jclouds.domain.Location;
 import org.jclouds.domain.LocationBuilder;
 import org.jclouds.domain.LocationScope;
@@ -64,6 +66,7 @@ import org.jclouds.googlecomputeengine.features.DiskApi;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.options.DiskCreationOptions;
 import org.jclouds.location.suppliers.all.JustProvider;
+import org.jclouds.logging.Logger;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -99,7 +102,11 @@ public final class GoogleComputeEngineServiceAdapter
    private final FirewallTagNamingConvention.Factory firewallTagNamingConvention;
    private final List<String> imageProjects;
    private final LoadingCache<URI, Image> diskURIToImage;
-
+   
+   @Resource
+   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
+   protected Logger logger = Logger.NULL;
+   
    @Inject GoogleComputeEngineServiceAdapter(JustProvider justProvider, GoogleComputeEngineApi api,
                                             Predicate<AtomicReference<Operation>> operationDone,
                                             Predicate<AtomicReference<Instance>> instanceVisible,
@@ -154,7 +161,17 @@ public final class GoogleComputeEngineServiceAdapter
          Operation op = diskApi.create(
                diskOptions.diskName(), 
                new DiskCreationOptions.Builder().sizeGb(diskOptions.diskSizeGb()).build());
+             
+         waitOperationDone(op);
 
+//       AtomicReference<Operation> opRef = Atomics.newReference(op);
+//         if (! Predicates2.retry(operationDone, 30, 1, TimeUnit.SECONDS).apply(opRef)) {
+//            String msg = "Failed to create volume: " + diskOptions.diskName() + " in zone: " + zone + 
+//                  " operation: " + op;
+//            logger.error(msg);            
+//            throw new IllegalStateException(msg);
+//         } 
+         
          AttachDisk disk = AttachDisk.create(
                diskOptions.diskType(),
                diskOptions.diskMode(),
@@ -298,7 +315,7 @@ public final class GoogleComputeEngineServiceAdapter
 
    private void waitOperationDone(Operation operation) {
       AtomicReference<Operation> operationRef = Atomics.newReference(operation);
-
+      
       // wait for the operation to complete
       if (!operationDone.apply(operationRef)) {
          throw new UncheckedTimeoutException("operation did not reach DONE state" + operationRef.get());
